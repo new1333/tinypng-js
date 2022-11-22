@@ -1,6 +1,6 @@
 {
   "name": "tinypng-easy",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A lib to compress images using tinypng",
   "main": "index.js",
   "scripts": {
@@ -14,5 +14,8 @@
   "bin": "index.js",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "p-pool": "^1.0.0"
+  }
 }

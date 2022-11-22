@@ -3,6 +3,7 @@
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
+const PromisePool = require("p-pool");
 
 const inputDir = process.argv[2] || ".";
 const cwd = process.cwd();
@@ -71,20 +72,27 @@ async function main() {
   const list = getAllDirFiles();
   fs.mkdirSync(outputDir, { recursive: true });
 
+  let tasks = [];
   for (let i = 0; i < list.length; i++) {
-    const filename = list[i];
-    const filePath = path.resolve(workingDir, filename);
-    const info = await uploadImage(filePath);
-    await downloadFile(info.output.url, path.resolve(outputDir, filename));
-    const inputSize = info.input.size;
-    const outputSize = info.output.size;
-    console.log(
-      `压缩【${filename}】 [${inputSize}] -> [${outputSize}]  ${(
-        (outputSize * 100) /
-        inputSize
-      ).toFixed(2)}%`
-    );
+    const t = async () => {
+      const filename = list[i];
+      const filePath = path.resolve(workingDir, filename);
+      const info = await uploadImage(filePath);
+      await downloadFile(info.output.url, path.resolve(outputDir, filename));
+      const inputSize = info.input.size;
+      const outputSize = info.output.size;
+      console.log(
+        `压缩【${filename}】 [${inputSize}] -> [${outputSize}]  ${(
+          (outputSize * 100) /
+          inputSize
+        ).toFixed(2)}%`
+      );
+    };
+    tasks.push(t);
   }
+
+  const pool = new PromisePool(tasks, 20);
+  pool.run();
 }
 
 main();
