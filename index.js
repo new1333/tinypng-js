@@ -73,6 +73,8 @@ async function main() {
   fs.mkdirSync(outputDir, { recursive: true });
 
   let tasks = [];
+  let originSize = 0;
+  let compressedSize = 0;
   for (let i = 0; i < list.length; i++) {
     const t = async () => {
       const filename = list[i];
@@ -87,12 +89,18 @@ async function main() {
           inputSize
         ).toFixed(2)}%`
       );
+      originSize += inputSize;
+      compressedSize += outputSize;
     };
     tasks.push(t);
   }
 
   const pool = new PromisePool(tasks, 20);
-  pool.run();
+  await pool.run();
+  console.log("压缩前大小：" + (originSize / 1000 / 1000).toFixed(2) + "MB");
+  console.log(
+    "压缩后大小：" + (compressedSize / 1000 / 1000).toFixed(2) + "MB"
+  );
 }
 
 main();
